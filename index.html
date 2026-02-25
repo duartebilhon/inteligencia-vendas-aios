@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inteligência de Vendas — Imersão AIOS</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0a0a0f;--surface:#111118;--surface2:#1a1a26;--surface3:#22223a;
+  --accent:#7c3aed;--accent2:#a855f7;--accent3:#c084fc;
+  --gold:#f59e0b;--green:#10b981;--red:#ef4444;--blue:#3b82f6;--orange:#f97316;
+  --text:#f1f5f9;--muted:#94a3b8;--border:rgba(124,58,237,0.2);
+}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+/* NAV */
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0;position:sticky;top:0;z-index:100}
+.topbar-inner{max-width:1100px;margin:0 auto;display:flex;align-items:center;gap:0;padding:0 24px}
+.logo{font-size:13px;font-weight:700;color:var(--accent3);letter-spacing:1px;padding:16px 0;margin-right:32px;white-space:nowrap}
+.tab-btn{background:none;border:none;color:var(--muted);font-size:13px;font-weight:600;padding:18px 20px;cursor:pointer;font-family:'Inter',sans-serif;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap}
+.tab-btn:hover{color:var(--text)}
+.tab-btn.active{color:var(--accent3);border-bottom-color:var(--accent)}
+.btn-pdf{margin-left:auto;background:linear-gradient(135deg,var(--accent),var(--accent2));color:white;border:none;padding:8px 18px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif}
+
+/* PANELS */
+.panel{display:none;max-width:1100px;margin:0 auto;padding:40px 24px}
+.panel.active{display:block}
+
+/* TYPOGRAPHY */
+.section-title{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent3);margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+h2{font-size:28px;font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent3) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:6px}
+.lead{font-size:14px;color:var(--muted);margin-bottom:32px}
+
+/* STAT CARDS */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:40px}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;text-align:center}
+.stat .val{font-size:36px;font-weight:800;background:linear-gradient(135deg,var(--accent2),var(--accent3));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.stat .val.green{background:linear-gradient(135deg,#10b981,#34d399);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.stat .val.gold{background:linear-gradient(135deg,#f59e0b,#fbbf24);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.stat .lbl{font-size:11px;color:var(--muted);margin-top:4px;font-weight:500}
+
+/* TABLES */
+.table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:32px}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{background:var(--surface2);color:var(--accent3);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;font-weight:600;padding:12px 16px;text-align:left}
+td{padding:12px 16px;border-bottom:1px solid rgba(255,255,255,0.04);color:#cbd5e1;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(124,58,237,0.04)}
+.num{color:var(--accent3);font-weight:700}
+.pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600}
+.p-alta{background:rgba(239,68,68,.15);color:#f87171}
+.p-media{background:rgba(245,158,11,.15);color:#fbbf24}
+.p-baixa{background:rgba(16,185,129,.15);color:#34d399}
+.p-green{background:rgba(16,185,129,.15);color:#34d399}
+.p-gold{background:rgba(245,158,11,.15);color:#fbbf24}
+.p-blue{background:rgba(59,130,246,.15);color:#60a5fa}
+
+/* BAR CHART */
+.bar-list{display:flex;flex-direction:column;gap:10px;margin-bottom:32px}
+.bar-item{display:flex;align-items:center;gap:12px}
+.bar-label{font-size:12.5px;color:#cbd5e1;min-width:260px}
+.bar-track{flex:1;height:8px;background:var(--surface3);border-radius:10px;overflow:hidden}
+.bar-fill{height:100%;border-radius:10px;transition:width .3s}
+.bar-count{font-size:12px;font-weight:700;color:var(--text);min-width:60px;text-align:right}
+
+/* CLOSES */
+.close-tag{display:inline-flex;align-items:center;gap:6px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.25);border-radius:6px;padding:2px 8px;font-size:11px;color:#34d399;font-weight:600}
+.quasi-tag{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.25);color:#fbbf24}
+.quasi-list{background:var(--surface2);border-radius:10px;padding:16px 20px;margin-top:8px}
+.quasi-list li{font-size:13.5px;color:#cbd5e1;margin-bottom:8px;list-style:none;padding-left:16px;position:relative}
+.quasi-list li::before{content:'→';position:absolute;left:0;color:var(--gold)}
+
+/* ── TAB 2 MARKETING ── */
+.mkt-header{background:linear-gradient(135deg,rgba(124,58,237,.12),rgba(168,85,247,.06));border:1px solid rgba(124,58,237,.3);border-radius:16px;padding:28px;margin-bottom:36px}
+.mkt-header h3{font-size:20px;font-weight:700;color:var(--text);margin-bottom:8px}
+.mkt-header p{font-size:14px;color:var(--muted);line-height:1.65}
+.obj-block{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:24px;margin-bottom:20px;position:relative;overflow:hidden}
+.obj-block::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:linear-gradient(180deg,var(--accent),var(--accent2));border-radius:4px 0 0 4px}
+.obj-block-header{display:flex;align-items:flex-start;gap:14px;margin-bottom:16px}
+.obj-rank{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:white;flex-shrink:0}
+.obj-meta{flex:1}
+.obj-meta h4{font-size:16px;font-weight:700;color:var(--text);font-style:italic;margin-bottom:4px}
+.obj-meta .tags{display:flex;gap:6px;flex-wrap:wrap}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+.mini-card{background:var(--surface2);border-radius:10px;padding:14px}
+.mini-card-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px}
+.mini-card-title.why{color:var(--gold)}
+.mini-card-title.how{color:var(--green)}
+.mini-card-title.live{color:var(--accent3)}
+.mini-card-title.phrase{color:var(--orange)}
+.mini-card p,.mini-card ul{font-size:13px;color:#cbd5e1;line-height:1.6}
+.mini-card ul{padding-left:16px}
+.mini-card ul li{margin-bottom:5px}
+.quote{background:var(--surface3);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;padding:10px 14px;margin-top:10px;font-size:12.5px;color:var(--accent3);font-style:italic;line-height:1.55}
+.full-width{grid-column:1/-1}
+.freq-bar{display:flex;align-items:center;gap:10px;margin-top:14px}
+.freq-bar span{font-size:11px;color:var(--muted)}
+.freq-bar-track{flex:1;height:5px;background:var(--surface3);border-radius:10px;overflow:hidden}
+.freq-bar-fill{height:100%;border-radius:10px}
+
+/* ── TAB 3 DETAIL ── */
+.detail-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:26px;margin-bottom:20px;position:relative;overflow:hidden}
+.detail-card::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:linear-gradient(180deg,var(--accent),var(--accent2));border-radius:4px 0 0 4px}
+.detail-header{display:flex;gap:14px;align-items:flex-start;margin-bottom:18px}
+.detail-num{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:white;flex-shrink:0}
+.detail-title{font-size:17px;font-weight:700;font-style:italic;color:var(--text);margin-bottom:5px;line-height:1.3}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.detail-section{background:var(--surface2);border-radius:10px;padding:14px}
+.ds-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px}
+.ds-title.ctx{color:var(--gold)}
+.ds-title.psy{color:var(--blue)}
+.ds-title.resp{color:var(--green)}
+.ds-title.phrase{color:var(--accent3)}
+.detail-section p,.detail-section ul{font-size:13px;color:#cbd5e1;line-height:1.65}
+.detail-section ul{padding-left:15px}
+.detail-section ul li{margin-bottom:5px}
+.quote-d{background:var(--surface3);border-left:3px solid var(--accent);border-radius:0 7px 7px 0;padding:10px 14px;margin-top:8px;font-size:12.5px;color:var(--accent3);font-style:italic;line-height:1.5}
+.impact-row{display:flex;align-items:center;gap:10px;margin-top:14px}
+.impact-lbl{font-size:11px;color:var(--muted);min-width:90px}
+.impact-track{flex:1;height:5px;background:var(--surface3);border-radius:10px;overflow:hidden}
+.impact-pct{font-size:12px;font-weight:700;min-width:36px;text-align:right}
+
+/* FOOTER */
+.footer{text-align:center;padding:32px 24px;border-top:1px solid var(--border);font-size:12px;color:var(--muted);max-width:1100px;margin:0 auto}
+
+@media print{
+  body{background:white;color:#111}
+  :root{--bg:white;--surface:#f9f9f9;--surface2:#f0f0f0;--surface3:#e5e5e5;--text:#111;--muted:#666;--border:rgba(0,0,0,.1);--accent3:#7c3aed}
+  .topbar{display:none}
+  .btn-pdf{display:none}
+  .panel{display:block!important;padding:20px}
+  h2{-webkit-text-fill-color:#111;background:none;color:#111}
+  .stat .val{-webkit-text-fill-color:#7c3aed}
+  @page{margin:15mm}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="logo">AIOS · INTELIGÊNCIA DE VENDAS</div>
+    <button class="tab-btn active" onclick="showTab('dash',this)">Dashboard</button>
+    <button class="tab-btn" onclick="showTab('mkt',this)">Para o Head de Marketing</button>
+    <button class="tab-btn" onclick="showTab('detail',this)">Análise Detalhada</button>
+    <button class="tab-btn" onclick="showTab('calls',this)">Calls Reais</button>
+    <button class="btn-pdf" onclick="window.print()">⬇ PDF</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     TAB 1 — DASHBOARD
+══════════════════════════════════════════ -->
+<div id="dash" class="panel active">
+
+  <div style="margin-bottom:32px">
+    <h2>Dashboard de Objeções</h2>
+    <p class="lead">Imersão AIOS · 47 gravações analisadas · Closer: Gustavo Peçanha · Fev/2026</p>
+  </div>
+
+  <!-- STATS -->
+  <div class="section-title">Visão Geral</div>
+  <div class="stats-grid">
+    <div class="stat"><div class="val">47</div><div class="lbl">Calls gravadas</div></div>
+    <div class="stat"><div class="val">40</div><div class="lbl">Calls com conteúdo</div></div>
+    <div class="stat"><div class="val green">5</div><div class="lbl">Fechamentos confirmados</div></div>
+    <div class="stat"><div class="val gold">12,5%</div><div class="lbl">Taxa de conversão</div></div>
+  </div>
+
+  <!-- CLOSES TABLE -->
+  <div class="section-title">Fechamentos Confirmados</div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>#</th><th>Prospect</th><th>Segmento</th><th>Valor</th><th>Data</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td class="num">01</td><td>David</td><td>Gestão artística / música — Goiânia</td><td>3× R$38k PIX</td><td>13/02</td><td><span class="pill p-green">Fechou</span></td></tr>
+        <tr><td class="num">02</td><td>Hugo + Darlan</td><td>NutraSelf USA — Direct Response</td><td>USD wire (Chase)</td><td>16/02</td><td><span class="pill p-green">Fechou</span></td></tr>
+        <tr><td class="num">03</td><td>Eduardo Collado</td><td>Direct Response afiliado — Itapema/SC</td><td>R$100k cartão</td><td>16/02</td><td><span class="pill p-green">Fechou</span></td></tr>
+        <tr><td class="num">04</td><td>Daniel</td><td>NutraSelf USA + telemedicina — Maceió</td><td>USD wire (Chase)</td><td>17/02</td><td><span class="pill p-green">Fechou</span></td></tr>
+        <tr><td class="num">05</td><td>André</td><td>Mentoria cripto high ticket — SP</td><td>R$95k cartão cripto</td><td>22/02</td><td><span class="pill p-green">Fechou</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section-title">Quasi-Fechados (aguardando pagamento final)</div>
+  <ul class="quasi-list" style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px 24px;margin-bottom:32px">
+    <li><strong>Michael + Rafaela</strong> (hipnoterapia, SP) — R$5k depositado · PIX de R$95k agendado para 27/02 <span class="pill p-gold" style="margin-left:8px">Aguardando</span></li>
+    <li><strong>Willian Jackson + Felipe</strong> (WB Group, telecom + motos) — R$5k depositado · Cartão bloqueou verificação bancária durante a call <span class="pill p-gold" style="margin-left:8px">Aguardando</span></li>
+  </ul>
+
+  <!-- OBJECTIONS BAR -->
+  <div class="section-title">Top Objeções — 40 Calls Analisadas</div>
+  <div class="table-wrap" style="margin-bottom:32px">
+    <table>
+      <thead><tr><th>Rank</th><th>Objeção</th><th>Frequência</th><th>Nível</th></tr></thead>
+      <tbody>
+        <tr><td class="num">1</td><td>"Preciso consultar meu sócio / parceiro antes"</td><td>~12 calls</td><td><span class="pill p-alta">Alta</span></td></tr>
+        <tr><td class="num">2</td><td>"Fluxo de caixa / não tenho o dinheiro agora"</td><td>~10 calls</td><td><span class="pill p-alta">Alta</span></td></tr>
+        <tr><td class="num">3</td><td>"Decisor principal não estava na call"</td><td>~6 calls</td><td><span class="pill p-alta">Alta</span></td></tr>
+        <tr><td class="num">4</td><td>"ROI incerto / não consigo calcular o retorno"</td><td>~5 calls</td><td><span class="pill p-media">Média</span></td></tr>
+        <tr><td class="num">5</td><td>"Tenho medo de não estar preparado"</td><td>~5 calls</td><td><span class="pill p-media">Média</span></td></tr>
+        <tr><td class="num">6</td><td>"Precisa de aprovação do cônjuge / família"</td><td>~3 calls</td><td><span class="pill p-media">Média</span></td></tr>
+        <tr><td class="num">7</td><td>"Problema técnico de pagamento" (cartão, USD, verificação)</td><td>~3 calls</td><td><span class="pill p-media">Média</span></td></tr>
+        <tr><td class="num">8</td><td>"Quero ver na prática, não no papel"</td><td>~3 calls</td><td><span class="pill p-baixa">Baixa</span></td></tr>
+        <tr><td class="num">9</td><td>"Não é o dinheiro, é o timing / próxima turma"</td><td>~2 calls</td><td><span class="pill p-baixa">Baixa</span></td></tr>
+        <tr><td class="num">10</td><td>"Não posso comparecer presencialmente"</td><td>~2 calls</td><td><span class="pill p-baixa">Baixa</span></td></tr>
+        <tr><td class="num">11</td><td>"Vai eliminar meus funcionários?"</td><td>~2 calls</td><td><span class="pill p-baixa">Baixa</span></td></tr>
+        <tr><td class="num">12</td><td>"O suporte é só grupo de WhatsApp?"</td><td>~1 call</td><td><span class="pill p-baixa">Baixa</span></td></tr>
+        <tr><td class="num">13</td><td>"Parece bom demais para ser verdade"</td><td>~1 call</td><td><span class="pill p-baixa">Baixa</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- BARCHART VISUAL -->
+  <div class="section-title">Frequência por Objeção</div>
+  <div class="bar-list" style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:24px;margin-bottom:40px">
+    <div class="bar-item"><span class="bar-label">Consultar sócio/parceiro</span><div class="bar-track"><div class="bar-fill" style="width:100%;background:linear-gradient(90deg,#ef4444,#f87171)"></div></div><span class="bar-count">~12 calls</span></div>
+    <div class="bar-item"><span class="bar-label">Fluxo de caixa</span><div class="bar-track"><div class="bar-fill" style="width:83%;background:linear-gradient(90deg,#ef4444,#f87171)"></div></div><span class="bar-count">~10 calls</span></div>
+    <div class="bar-item"><span class="bar-label">Decisor não estava na call</span><div class="bar-track"><div class="bar-fill" style="width:50%;background:linear-gradient(90deg,#f59e0b,#fbbf24)"></div></div><span class="bar-count">~6 calls</span></div>
+    <div class="bar-item"><span class="bar-label">ROI incerto</span><div class="bar-track"><div class="bar-fill" style="width:42%;background:linear-gradient(90deg,#f59e0b,#fbbf24)"></div></div><span class="bar-count">~5 calls</span></div>
+    <div class="bar-item"><span class="bar-label">Medo de não estar preparado</span><div class="bar-track"><div class="bar-fill" style="width:42%;background:linear-gradient(90deg,#f59e0b,#fbbf24)"></div></div><span class="bar-count">~5 calls</span></div>
+    <div class="bar-item"><span class="bar-label">Aprovação cônjuge/família</span><div class="bar-track"><div class="bar-fill" style="width:25%;background:linear-gradient(90deg,#10b981,#34d399)"></div></div><span class="bar-count">~3 calls</span></div>
+    <div class="bar-item"><span class="bar-label">Problema técnico pagamento</span><div class="bar-track"><div class="bar-fill" style="width:25%;background:linear-gradient(90deg,#10b981,#34d399)"></div></div><span class="bar-count">~3 calls</span></div>
+    <div class="bar-item"><span class="bar-label">Quero ver na prática</span><div class="bar-track"><div class="bar-fill" style="width:25%;background:linear-gradient(90deg,#10b981,#34d399)"></div></div><span class="bar-count">~3 calls</span></div>
+    <div class="bar-item"><span class="bar-label">Timing / próxima turma</span><div class="bar-track"><div class="bar-fill" style="width:17%;background:linear-gradient(90deg,#3b82f6,#60a5fa)"></div></div><span class="bar-count">~2 calls</span></div>
+    <div class="bar-item"><span class="bar-label">Outros (presença, funcionários...)</span><div class="bar-track"><div class="bar-fill" style="width:17%;background:linear-gradient(90deg,#3b82f6,#60a5fa)"></div></div><span class="bar-count">~2 calls</span></div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════
+     TAB 2 — MARKETING
+══════════════════════════════════════════ -->
+<div id="mkt" class="panel">
+
+  <div class="mkt-header">
+    <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent3);margin-bottom:10px">Para o Head de Marketing</div>
+    <h3>Roteiro para a Próxima Live — Quebrando Objeções em Tempo Real</h3>
+    <p>Este briefing foi gerado a partir da análise de <strong>47 gravações reais de calls de vendas</strong> da Imersão AIOS com Gustavo Peçanha. Cada seção abaixo traz a objeção, o porquê ela acontece, e como abordar proativamente na live para eliminar a resistência <em>antes</em> de a pessoa sair da transmissão.</p>
+  </div>
+
+  <!-- OBJ 1 -->
+  <div class="obj-block">
+    <div class="obj-block-header">
+      <div class="obj-rank">1</div>
+      <div class="obj-meta">
+        <h4>"Preciso consultar meu sócio / parceiro antes de decidir."</h4>
+        <div class="tags"><span class="pill p-alta">Alta — ~12 calls</span><span class="pill p-blue">Autoridade / Timing</span></div>
+      </div>
+    </div>
+    <div class="two-col">
+      <div class="mini-card">
+        <div class="mini-card-title why">Por que acontece</div>
+        <p>O prospect está convencido, mas não tem poder de decisão sozinho — ou usa o sócio como escudo emocional para ganhar tempo. Raramente é realmente sobre o sócio.</p>
+      </div>
+      <div class="mini-card">
+        <div class="mini-card-title how">Como prevenir na live</div>
+        <ul>
+          <li>Falar explicitamente: <em>"Se você tem sócio, manda o link dessa live para ele agora — essa decisão é dos dois."</em></li>
+          <li>Criar urgência antes do fim: <em>"Você tem 20 minutos para chamar seu sócio para assistir junto."</em></li>
+        </ul>
+      </div>
+      <div class="mini-card full-width">
+        <div class="mini-card-title phrase">Frase para usar na live</div>
+        <div class="quote">"Eu sei que muitos de vocês não tomam essa decisão sozinhos. Por isso estou pedindo agora: chama seu sócio, sua sócia, o co-fundador — manda o link. Porque essa oportunidade fecha ainda hoje e não dá para explicar em uma mensagem de WhatsApp o que eu estou mostrando aqui."</div>
+      </div>
+    </div>
+    <div class="freq-bar"><span>Frequência</span><div class="freq-bar-track"><div class="freq-bar-fill" style="width:100%;background:linear-gradient(90deg,#ef4444,#f87171)"></div></div><span style="font-size:12px;font-weight:700">~12 calls</span></div>
+  </div>
+
+  <!-- OBJ 2 -->
+  <div class="obj-block">
+    <div class="obj-block-header">
+      <div class="obj-rank">2</div>
+      <div class="obj-meta">
+        <h4>"Não tenho esse dinheiro agora / fluxo de caixa apertado."</h4>
+        <div class="tags"><span class="pill p-alta">Alta — ~10 calls</span><span class="pill p-blue">Financeiro / Timing</span></div>
+      </div>
+    </div>
+    <div class="two-col">
+      <div class="mini-card">
+        <div class="mini-card-title why">Por que acontece</div>
+        <p>O caixa do empresário está comprometido com outros investimentos ou em período de baixa sazonal. Em muitos casos, o dinheiro existe — mas está alocado. A prioridade não foi criada ainda.</p>
+      </div>
+      <div class="mini-card">
+        <div class="mini-card-title how">Como prevenir na live</div>
+        <ul>
+          <li>Mostrar as formas de pagamento antes da oferta: PIX à vista, PIX 2×55k ou 3×38k, cartão em até 12×.</li>
+          <li>Ancorar no custo de NÃO implementar: <em>"Quanto você está gastando por mês com pessoas fazendo o que a IA poderia fazer?"</em></li>
+          <li>Apresentar o ROI concreto: casos de quem economizou ou faturou mais em 90 dias.</li>
+        </ul>
+      </div>
+      <div class="mini-card full-width">
+        <div class="mini-card-title phrase">Frase para usar na live</div>
+        <div class="quote">"Eu ouço muito 'não tenho esse dinheiro agora'. Mas vou te perguntar o contrário: quanto você está perdendo por mês por não ter esse sistema? Se a resposta for mais de R$30k — e vai ser — então você não pode dar ao luxo de esperar."</div>
+      </div>
+    </div>
+    <div class="freq-bar"><span>Frequência</span><div class="freq-bar-track"><div class="freq-bar-fill" style="width:83%;background:linear-gradient(90deg,#ef4444,#f87171)"></div></div><span style="font-size:12px;font-weight:700">~10 calls</span></div>
+  </div>
+
+  <!-- OBJ 3 -->
+  <div class="obj-block">
+    <div class="obj-block-header">
+      <div class="obj-rank">3</div>
+      <div class="obj-meta">
+        <h4>"A pessoa que decide na empresa não estava na call."</h4>
+        <div class="tags"><span class="pill p-alta">Alta — ~6 calls</span><span class="pill p-blue">Autoridade</span></div>
+      </div>
+    </div>
+    <div class="two-col">
+      <div class="mini-card">
+        <div class="mini-card-title why">Por que acontece</div>
+        <p>Muitas calls chegam com gestores intermediários ou sócios minoritários. O CEO, diretor financeiro ou co-fundador decisor não estava presente e precisa aprovar depois — o que esfria a decisão.</p>
+      </div>
+      <div class="mini-card">
+        <div class="mini-card-title how">Como prevenir na live</div>
+        <ul>
+          <li>Deixar explícito no convite e na abertura da live: <em>"Essa live é para o dono da empresa. Se você não é quem decide, chama quem decide agora."</em></li>
+          <li>Criar replay com acesso restrito e prazo para que o decisor possa assistir antes do encerramento das vagas.</li>
+        </ul>
+      </div>
+      <div class="mini-card full-width">
+        <div class="mini-card-title phrase">Frase para usar na live</div>
+        <div class="quote">"Se o CEO, o sócio majoritário ou o financeiro da sua empresa não está aqui agora — manda o link. Você vai querer que ele veja isso antes de você sair daqui e ter que explicar o que é o AIOS numa mensagem de texto."</div>
+      </div>
+    </div>
+    <div class="freq-bar"><span>Frequência</span><div class="freq-bar-track"><div class="freq-bar-fill" style="width:50%;background:linear-gradient(90deg,#f59e0b,#fbbf24)"></div></div><span style="font-size:12px;font-weight:700">~6 calls</span></div>
+  </div>
+
+  <!-- OBJ 4 -->
+  <div class="obj-block">
+    <div class="obj-block-header">
+      <div class="obj-rank">4</div>
+      <div class="obj-meta">
+        <h4>"Não sei se o retorno compensa. Não consigo calcular o ROI."</h4>
+        <div class="tags"><span class="pill p-media">Média — ~5 calls</span><span class="pill p-blue">Lógica / Valor</span></div>
+      </div>
+    </div>
+    <div class="two-col">
+      <div class="mini-card">
+        <div class="mini-card-title why">Por que acontece</div>
+        <p>O empresário não consegue enxergar com clareza como os R$100k se transformam em resultado. A promessa é grande mas abstrata — ele precisa de um cálculo concreto para justificar para si mesmo.</p>
+      </div>
+      <div class="mini-card">
+        <div class="mini-card-title how">Como prevenir na live</div>
+        <ul>
+          <li>Fazer o cálculo AO VIVO na live: <em>"Quantas horas/mês seu time gasta em tarefas repetitivas? Multiplique pelo salário. Esse é o custo mensal de não ter IA."</em></li>
+          <li>Apresentar cases com números reais: "empresa X reduziu 4 funcionários e faturou 30% mais em 90 dias".</li>
+          <li>Mostrar o payback: R$100k ÷ economia mensal estimada = prazo para se pagar.</li>
+        </ul>
+      </div>
+      <div class="mini-card full-width">
+        <div class="mini-card-title phrase">Frase para usar na live</div>
+        <div class="quote">"Vou fazer o cálculo para você agora. Se você tem 5 pessoas fazendo tarefas que a IA resolve, com salário médio de R$4k, são R$20k por mês. Em 5 meses você recuperou o investimento — e do 6º mês em diante é puro lucro. Qual é o payback na sua empresa?"</div>
+      </div>
+    </div>
+    <div class="freq-bar"><span>Frequência</span><div class="freq-bar-track"><div class="freq-bar-fill" style="width:42%;background:linear-gradient(90deg,#f59e0b,#fbbf24)"></div></div><span style="font-size:12px;font-weight:700">~5 calls</span></div>
+  </div>
+
+  <!-- OBJ 5 -->
+  <div class="obj-block">
+    <div class="obj-block-header">
+      <div class="obj-rank">5</div>
+      <div class="obj-meta">
+        <h4>"Tenho medo de não estar preparado / não aproveitar."</h4>
+        <div class="tags"><span class="pill p-media">Média — ~5 calls</span><span class="pill p-blue">Autoconfiança</span></div>
+      </div>
+    </div>
+    <div class="two-col">
+      <div class="mini-card">
+        <div class="mini-card-title why">Por que acontece</div>
+        <p>Empresários de setores tradicionais (mineração, advocacia, indústria) sentem que estão "atrasados" em IA. O medo não é do produto — é de fracassar na implementação e desperdiçar R$100k.</p>
+      </div>
+      <div class="mini-card">
+        <div class="mini-card-title how">Como prevenir na live</div>
+        <ul>
+          <li>Deixar claro que <strong>não precisa saber programar</strong> — a imersão constrói tudo do zero.</li>
+          <li>Mostrar perfis de alunos anteriores que eram "leigos" e saíram com o sistema funcionando.</li>
+          <li>Destacar que antes da imersão há um mentor que faz o setup técnico com o aluno.</li>
+        </ul>
+      </div>
+      <div class="mini-card full-width">
+        <div class="mini-card-title phrase">Frase para usar na live</div>
+        <div class="quote">"Você não precisa entender de IA para entrar na imersão. Você precisa entender do seu negócio — e isso você já sabe melhor do que ninguém. Nos dois dias, você não vai aprender teoria: você vai construir o sistema enquanto aprende. E vai sair com ele rodando."</div>
+      </div>
+    </div>
+    <div class="freq-bar"><span>Frequência</span><div class="freq-bar-track"><div class="freq-bar-fill" style="width:42%;background:linear-gradient(90deg,#f59e0b,#fbbf24)"></div></div><span style="font-size:12px;font-weight:700">~5 calls</span></div>
+  </div>
+
+  <!-- OBJ 6 -->
+  <div class="obj-block">
+    <div class="obj-block-header">
+      <div class="obj-rank">6</div>
+      <div class="obj-meta">
+        <h4>"Não é o momento certo / próxima turma talvez."</h4>
+        <div class="tags"><span class="pill p-media">Média — ~3 calls</span><span class="pill p-blue">Timing / Procrastinação</span></div>
+      </div>
+    </div>
+    <div class="two-col">
+      <div class="mini-card">
+        <div class="mini-card-title why">Por que acontece</div>
+        <p>O prospect está convencido do valor mas usa o timing como válvula de escape. "Próxima turma" é uma forma de dizer "sim, mas não agora" — que na prática raramente se concretiza.</p>
+      </div>
+      <div class="mini-card">
+        <div class="mini-card-title how">Como prevenir na live</div>
+        <ul>
+          <li>Criar urgência real: mostrar quantas vagas restam e que não há previsão de próxima turma com as mesmas condições.</li>
+          <li>Inverter o raciocínio: <em>"Exatamente por você estar em expansão, esse é o melhor momento — os processos escalam certos ou errados."</em></li>
+          <li>Perguntar ao vivo: <em>"Levanta a mão quem disse isso na última turma e ainda não implementou."</em></li>
+        </ul>
+      </div>
+      <div class="mini-card full-width">
+        <div class="mini-card-title phrase">Frase para usar na live</div>
+        <div class="quote">"Não existe 'próxima turma' com as mesmas condições. E o timing perfeito nunca chega — empresas que crescem são as que implementam no meio da bagunça, não depois que ela se resolve."</div>
+      </div>
+    </div>
+    <div class="freq-bar"><span>Frequência</span><div class="freq-bar-track"><div class="freq-bar-fill" style="width:25%;background:linear-gradient(90deg,#10b981,#34d399)"></div></div><span style="font-size:12px;font-weight:700">~3 calls</span></div>
+  </div>
+
+  <!-- OBJ 7 -->
+  <div class="obj-block">
+    <div class="obj-block-header">
+      <div class="obj-rank">7</div>
+      <div class="obj-meta">
+        <h4>"Vai eliminar meus funcionários?"</h4>
+        <div class="tags"><span class="pill p-baixa">Baixa — ~2 calls</span><span class="pill p-blue">Resistência Cultural</span></div>
+      </div>
+    </div>
+    <div class="two-col">
+      <div class="mini-card">
+        <div class="mini-card-title why">Por que acontece</div>
+        <p>O empresário se identifica com sua equipe e teme ser o "vilão" que cortou empregos. Também há preocupação com resistência interna da equipe à mudança.</p>
+      </div>
+      <div class="mini-card">
+        <div class="mini-card-title how">Como prevenir na live</div>
+        <ul>
+          <li>Antecipar a objeção você mesmo na live — antes que a audiência pense: <em>"Já sei o que vocês estão pensando..."</em></li>
+          <li>Reframe: não demite, redistribui. As tarefas repetitivas vão para os agentes; o time humano faz o que só humano faz.</li>
+        </ul>
+      </div>
+      <div class="mini-card full-width">
+        <div class="mini-card-title phrase">Frase para usar na live</div>
+        <div class="quote">"Eu sei o que você está pensando: 'vou ter que demitir meu time'. Não é isso. As empresas que implementaram AIOS não demitiram — redirecionaram. Seu SDR humano passou a cuidar de relacionamento; o agente SDR faz a prospecção fria. Seu time fica mais forte, não menor."</div>
+      </div>
+    </div>
+    <div class="freq-bar"><span>Frequência</span><div class="freq-bar-track"><div class="freq-bar-fill" style="width:17%;background:linear-gradient(90deg,#3b82f6,#60a5fa)"></div></div><span style="font-size:12px;font-weight:700">~2 calls</span></div>
+  </div>
+
+  <!-- OBJ 8 -->
+  <div class="obj-block">
+    <div class="obj-block-header">
+      <div class="obj-rank">8</div>
+      <div class="obj-meta">
+        <h4>"Quero ver na prática antes de decidir."</h4>
+        <div class="tags"><span class="pill p-baixa">Baixa — ~3 calls</span><span class="pill p-blue">Prova / Evidência</span></div>
+      </div>
+    </div>
+    <div class="two-col">
+      <div class="mini-card">
+        <div class="mini-card-title why">Por que acontece</div>
+        <p>Perfis técnicos e especialistas em IA não se convencem com promessas — querem ver o sistema rodando ao vivo. É ceticismo racional, não emocional.</p>
+      </div>
+      <div class="mini-card">
+        <div class="mini-card-title how">Como prevenir na live</div>
+        <ul>
+          <li>Fazer demonstração AO VIVO na live — mostrar o agente recebendo um problema real e resolvendo em tempo real.</li>
+          <li>Enviar cases por setor antes da live para quem fez pré-inscrição.</li>
+          <li>Usar telas reais, não slides — quem é técnico percebe a diferença imediatamente.</li>
+        </ul>
+      </div>
+      <div class="mini-card full-width">
+        <div class="mini-card-title phrase">Frase para usar na live</div>
+        <div class="quote">"Eu não quero que você acredite na minha palavra. Por isso vou mostrar agora, ao vivo, o agente resolvendo um problema real. Me manda nos comentários um desafio da sua operação — e eu vou mostrar como o AIOS resolveria."</div>
+      </div>
+    </div>
+    <div class="freq-bar"><span>Frequência</span><div class="freq-bar-track"><div class="freq-bar-fill" style="width:25%;background:linear-gradient(90deg,#10b981,#34d399)"></div></div><span style="font-size:12px;font-weight:700">~3 calls</span></div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════
+     TAB 3 — ANÁLISE DETALHADA
+══════════════════════════════════════════ -->
+<div id="detail" class="panel">
+
+  <div style="margin-bottom:32px">
+    <h2>Análise Detalhada das Objeções</h2>
+    <p class="lead">47 gravações · Closer: Gustavo Peçanha · Combinado com calls VTT (Karine, Arcson, Wilder, Miguel) · Fev/2026</p>
+  </div>
+
+  <!-- OBJ 1 -->
+  <div class="detail-card">
+    <div class="detail-header">
+      <div class="detail-num">01</div>
+      <div>
+        <div class="detail-title">"Preciso consultar meu sócio / parceiro antes de decidir."</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap"><span class="pill p-alta">Alta — ~12 calls</span><span class="pill p-blue">Autoridade</span><span class="pill" style="background:rgba(124,58,237,.15);color:var(--accent3);border:1px solid var(--border)">Arcson · Miguel · Lions · Christian · Marcelo (EUA) · e outros</span></div>
+      </div>
+    </div>
+    <div class="detail-grid">
+      <div class="detail-section"><div class="ds-title ctx">Contexto</div><p>Apareceu em pelo menos 12 calls. Em múltiplos casos o prospect estava individualmente convicto mas precisava de validação do sócio antes de comprometer R$100k. Em outros, o sócio seria o decisor real — e não estava na call.</p></div>
+      <div class="detail-section"><div class="ds-title psy">Psicologia</div><p>Raramente é realmente sobre o sócio. É uma forma de comprar tempo sem dizer "não". Indica falta de ownership emocional ou medo de tomar a decisão sozinho. O sócio real muitas vezes nem sabe que a reunião aconteceu.</p></div>
+      <div class="detail-section"><div class="ds-title resp">Como Responder</div><ul><li>Qualificar o decisor antes da call: "Quem mais vai estar envolvido nessa decisão?"</li><li>Testar a objeção: "Se seu sócio dissesse sim agora, você fecharia?"</li><li>Oferecer call rápida com o sócio presente: "Posso fazer 15 minutos com vocês dois?"</li><li>Enviar one-pager resumido para o sócio analisar sem contexto frio.</li></ul></div>
+      <div class="detail-section"><div class="ds-title phrase">Frase Modelo</div><div class="quote-d">"Faz sentido. Para facilitar: posso preparar um resumo de 1 página para seu sócio — os pontos principais, o ROI estimado e as próximas vagas. Você passa para ele e a conversa já começa no nível certo. Posso enviar agora?"</div></div>
+    </div>
+    <div class="impact-row"><span class="impact-lbl">Risco de perda</span><div class="impact-track"><div style="width:85%;height:100%;background:linear-gradient(90deg,#ef4444,#f87171);border-radius:10px"></div></div><span class="impact-pct" style="color:#f87171">85%</span></div>
+  </div>
+
+  <!-- OBJ 2 -->
+  <div class="detail-card">
+    <div class="detail-header">
+      <div class="detail-num">02</div>
+      <div>
+        <div class="detail-title">"Não tenho esse dinheiro agora / fluxo de caixa apertado."</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap"><span class="pill p-alta">Alta — ~10 calls</span><span class="pill p-blue">Financeiro</span><span class="pill" style="background:rgba(124,58,237,.15);color:var(--accent3);border:1px solid var(--border)">André (veículos) · Thales (revestimentos) · Blenner (FAB) · e outros</span></div>
+      </div>
+    </div>
+    <div class="detail-grid">
+      <div class="detail-section"><div class="ds-title ctx">Contexto</div><p>Recorrente em empresas com caixa comprometido em investimentos paralelos (reforma de loja, contratos abertos, expansão física). Em ~4 casos o prospect foi redirecionado para o Cohort Advanced (R$24.888) como alternativa mais acessível.</p></div>
+      <div class="detail-section"><div class="ds-title psy">Psicologia</div><p>Em muitos casos o dinheiro existe — mas está alocado em outra prioridade. A objeção financeira real acontece quando o empresário ainda não viu urgência suficiente para mover o caixa. Criar custo do atraso é mais efetivo que desconto.</p></div>
+      <div class="detail-section"><div class="ds-title resp">Como Responder</div><ul><li>Calcular o custo mensal de não implementar: horas × salários em tarefas que a IA resolveria.</li><li>Mostrar as opções de parcelamento antes da objeção aparecer.</li><li>Para quem realmente não pode: oferecer Cohort Advanced (R$24.888) como porta de entrada.</li><li>Nunca dar desconto — muda a percepção de valor do produto.</li></ul></div>
+      <div class="detail-section"><div class="ds-title phrase">Frase Modelo</div><div class="quote-d">"Entendo. Mas me diz: quanto você gasta por mês com pessoas fazendo tarefas que a IA resolve? Se forem 3 salários de R$4k, são R$12k/mês. Em menos de 9 meses você recuperou o investimento. O que está custando mais: os R$100k ou os próximos 12 meses sem isso?"</div></div>
+    </div>
+    <div class="impact-row"><span class="impact-lbl">Risco de perda</span><div class="impact-track"><div style="width:70%;height:100%;background:linear-gradient(90deg,#f59e0b,#fbbf24);border-radius:10px"></div></div><span class="impact-pct" style="color:#fbbf24">70%</span></div>
+  </div>
+
+  <!-- OBJ 3 -->
+  <div class="detail-card">
+    <div class="detail-header">
+      <div class="detail-num">03</div>
+      <div>
+        <div class="detail-title">"O decisor / CEO / financeiro não estava na call."</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap"><span class="pill p-alta">Alta — ~6 calls</span><span class="pill p-blue">Autoridade</span><span class="pill" style="background:rgba(124,58,237,.15);color:var(--accent3);border:1px solid var(--border)">HB Company · Startup Simplifica · Contour Magic · e outros</span></div>
+      </div>
+    </div>
+    <div class="detail-grid">
+      <div class="detail-section"><div class="ds-title ctx">Contexto</div><p>Calls chegaram com gestores intermediários (gerentes, sócios minoritários) sem poder de decisão de R$100k. Em alguns casos o CEO estava ciente mas delegou a call para um subordinado — que saiu sem poder fechar.</p></div>
+      <div class="detail-section"><div class="ds-title psy">Psicologia</div><p>Não é objeção do prospect — é falha no processo de qualificação do lead. A call não deveria acontecer sem o decisor presente. Quando acontece, o entusiasmo da pessoa presente esfria ao tentar "vender internamente" para o chefe.</p></div>
+      <div class="detail-section"><div class="ds-title resp">Como Responder</div><ul><li>Prevenir na qualificação: "Quem decide investimentos de R$100k na empresa?"</li><li>Se já está na call sem o decisor: agendar follow-up específico com ele presente.</li><li>Enviar material resumido e oferecer call de 20 min com o CEO.</li></ul></div>
+      <div class="detail-section"><div class="ds-title phrase">Frase Modelo</div><div class="quote-d">"Ótimo, vejo que você entendeu o valor. Para a gente avançar, preciso de 20 minutos com o CEO/sócio responsável por esse tipo de decisão. Você consegue me conectar com ele essa semana? Posso ser direto e economizar o tempo de vocês dois."</div></div>
+    </div>
+    <div class="impact-row"><span class="impact-lbl">Risco de perda</span><div class="impact-track"><div style="width:75%;height:100%;background:linear-gradient(90deg,#f59e0b,#fbbf24);border-radius:10px"></div></div><span class="impact-pct" style="color:#fbbf24">75%</span></div>
+  </div>
+
+  <!-- OBJ 4 -->
+  <div class="detail-card">
+    <div class="detail-header">
+      <div class="detail-num">04</div>
+      <div>
+        <div class="detail-title">"Não consigo calcular o ROI / retorno não está claro."</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap"><span class="pill p-media">Média — ~5 calls</span><span class="pill p-blue">Lógica / Valor</span><span class="pill" style="background:rgba(124,58,237,.15);color:var(--accent3);border:1px solid var(--border)">Yuri+Victor · Alexandre (SaaS) · Helder+Eduardo</span></div>
+      </div>
+    </div>
+    <div class="detail-grid">
+      <div class="detail-section"><div class="ds-title ctx">Contexto</div><p>Prospects analíticos (SaaS, energia solar, gestores financeiros) que precisam de uma planilha mental para justificar R$100k. Quando o ROI não é apresentado de forma concreta na call, a decisão trava.</p></div>
+      <div class="detail-section"><div class="ds-title psy">Psicologia</div><p>A mente analítica precisa de um número para "se autoconvencer". O problema não é a objeção em si — é que o closer não calculou o ROI específico do prospect antes de apresentar o preço. A objeção aparece porque o valor foi abstraído.</p></div>
+      <div class="detail-section"><div class="ds-title resp">Como Responder</div><ul><li>Calcular o ROI ao vivo usando os números do próprio prospect (coletados no diagnóstico).</li><li>Mostrar o payback: "Com X salários = Y/mês. Payback em Z meses."</li><li>Usar cases com métricas reais do mesmo setor.</li></ul></div>
+      <div class="detail-section"><div class="ds-title phrase">Frase Modelo</div><div class="quote-d">"Vamos calcular juntos agora. Você me disse que tem 8 pessoas. Se metade passa 50% do tempo em tarefas operacionais, são 4 FTEs a ~R$5k. São R$20k/mês. Isso se paga em 5 meses — do 6º em diante é retorno puro. Esse cálculo faz sentido para você?"</div></div>
+    </div>
+    <div class="impact-row"><span class="impact-lbl">Risco de perda</span><div class="impact-track"><div style="width:60%;height:100%;background:linear-gradient(90deg,#f59e0b,#fbbf24);border-radius:10px"></div></div><span class="impact-pct" style="color:#fbbf24">60%</span></div>
+  </div>
+
+  <!-- OBJ 5 -->
+  <div class="detail-card">
+    <div class="detail-header">
+      <div class="detail-num">05</div>
+      <div>
+        <div class="detail-title">"Tenho medo de não estar preparado / empresa não está madura."</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap"><span class="pill p-media">Média — ~5 calls</span><span class="pill p-blue">Autoconfiança</span><span class="pill" style="background:rgba(124,58,237,.15);color:var(--accent3);border:1px solid var(--border)">Wilder (mineração) · Miguel (advocacia)</span></div>
+      </div>
+    </div>
+    <div class="detail-grid">
+      <div class="detail-section"><div class="ds-title ctx">Contexto</div><p>Wilder Leal (mineração) verbalizou: "A nossa questão não é o dinheiro, é a degustação da informação. A gente precisa amadurecer primeiro." Miguel Ribeiro (advocacia): "Não posso ir cru na imersão." Ambos de setores tradicionais com baixa maturidade digital.</p></div>
+      <div class="detail-section"><div class="ds-title psy">Psicologia</div><p>É a objeção de maior profundidade emocional. Mistura insegurança técnica com identidade ("eu não sou uma pessoa de tecnologia"). O prospect protege o ego evitando o risco de investir R$100k e não conseguir usar. No fundo é medo de fracasso público.</p></div>
+      <div class="detail-section"><div class="ds-title resp">Como Responder</div><ul><li>Reframing: "A imersão não exige maturidade — ela cria maturidade. O programa foi feito para quem ainda não tem IA."</li><li>Mostrar que há mentor fazendo o setup técnico antes do evento.</li><li>Usar cases de alunos de setores tradicionais que implementaram.</li><li>Não precisa saber programar — você constrói durante os 2 dias.</li></ul></div>
+      <div class="detail-section"><div class="ds-title phrase">Frase Modelo</div><div class="quote-d">"Quando você contratou seu primeiro funcionário, a empresa estava 'madura para ter equipe'? Não — você criou essa maturidade contratando. Com IA é igual: você não espera estar pronto para implementar. Você implementa e fica pronto."</div></div>
+    </div>
+    <div class="impact-row"><span class="impact-lbl">Risco de perda</span><div class="impact-track"><div style="width:65%;height:100%;background:linear-gradient(90deg,#f59e0b,#fbbf24);border-radius:10px"></div></div><span class="impact-pct" style="color:#fbbf24">65%</span></div>
+  </div>
+
+  <!-- OBJ 6 -->
+  <div class="detail-card">
+    <div class="detail-header">
+      <div class="detail-num">06</div>
+      <div>
+        <div class="detail-title">"Não é o dinheiro — é o timing / próxima turma."</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap"><span class="pill p-media">Média — ~3 calls</span><span class="pill p-blue">Timing</span><span class="pill" style="background:rgba(124,58,237,.15);color:var(--accent3);border:1px solid var(--border)">Wilder Leal · Robert (RS)</span></div>
+      </div>
+    </div>
+    <div class="detail-grid">
+      <div class="detail-section"><div class="ds-title ctx">Contexto</div><p>Wilder disse explicitamente "o dinheiro não é o problema" e usou a maturidade como justificativa para adiar. Robert acabou de começar no Cohort e quer "adquirir o feeling" primeiro. Ambos querem a próxima turma como saída.</p></div>
+      <div class="detail-section"><div class="ds-title psy">Psicologia</div><p>Quando alguém diz "não é o momento", significa que não viu urgência suficiente para priorizar agora. Algo mais urgente compete com a atenção. O "timing" raramente melhora sozinho — precisa de catalisador externo (escassez, custo do atraso).</p></div>
+      <div class="detail-section"><div class="ds-title resp">Como Responder</div><ul><li>Inverter o timing: "Exatamente por estar em expansão, agora é o melhor momento."</li><li>Criar custo do atraso: "Cada mês sem isso é X de operação ineficiente."</li><li>Usar escassez real de vagas como ancoragem temporal.</li><li>Perguntar: "Em qual momento você diria que estaria pronto?"</li></ul></div>
+      <div class="detail-section"><div class="ds-title phrase">Frase Modelo</div><div class="quote-d">"Entendo seu ponto. Mas me diz: em qual momento você estaria pronto? Porque na minha experiência, o timing perfeito nunca chega — e as empresas que crescem são as que implementam no meio da bagunça, não depois que ela se resolve."</div></div>
+    </div>
+    <div class="impact-row"><span class="impact-lbl">Risco de perda</span><div class="impact-track"><div style="width:55%;height:100%;background:linear-gradient(90deg,#10b981,#34d399);border-radius:10px"></div></div><span class="impact-pct" style="color:#34d399">55%</span></div>
+  </div>
+
+  <!-- OBJ 7 -->
+  <div class="detail-card">
+    <div class="detail-header">
+      <div class="detail-num">07</div>
+      <div>
+        <div class="detail-title">"Quero ver na prática antes de decidir."</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap"><span class="pill p-baixa">Baixa — ~3 calls</span><span class="pill p-blue">Prova / Evidência</span><span class="pill" style="background:rgba(124,58,237,.15);color:var(--accent3);border:1px solid var(--border)">Karine (SubidoPRO) · Diogo (apostas)</span></div>
+      </div>
+    </div>
+    <div class="detail-grid">
+      <div class="detail-section"><div class="ds-title ctx">Contexto</div><p>Karine (SubidoPRO, certificada Stanford em IA) verbalizou: "Eu queria ver na prática. Isso aí eu não queria ver no papel." Foi escalada para Pedro Valerio que fez demonstração ao vivo na segunda call. Diogo (apostas esportivas) também pediu demonstração prática.</p></div>
+      <div class="detail-section"><div class="ds-title psy">Psicologia</div><p>Não é ceticismo sobre o produto — é aversão ao risco de comprador racional e técnico. Eles já acreditam em IA. Querem validação de ROI específico para o modelo de negócio deles antes de comprometer o capital.</p></div>
+      <div class="detail-section"><div class="ds-title resp">Como Responder</div><ul><li>Demonstração ao vivo: resolve o problema real do prospect na call, na tela.</li><li>Enviar case do mesmo setor antes da call.</li><li>Inverter: "Me conta um problema da sua operação — eu mostro como o AIOS resolveria agora."</li></ul></div>
+      <div class="detail-section"><div class="ds-title phrase">Frase Modelo</div><div class="quote-d">"Você está certo em querer ver. Me diz um problema real da sua operação agora — e eu vou mostrar ao vivo como o sistema resolveria. Não slides, não teoria. Sistema rodando."</div></div>
+    </div>
+    <div class="impact-row"><span class="impact-lbl">Risco de perda</span><div class="impact-track"><div style="width:50%;height:100%;background:linear-gradient(90deg,#10b981,#34d399);border-radius:10px"></div></div><span class="impact-pct" style="color:#34d399">50%</span></div>
+  </div>
+
+  <!-- OBJ 8 -->
+  <div class="detail-card">
+    <div class="detail-header">
+      <div class="detail-num">08</div>
+      <div>
+        <div class="detail-title">"Vai eliminar meus funcionários?"</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap"><span class="pill p-baixa">Baixa — ~2 calls</span><span class="pill p-blue">Resistência Cultural</span><span class="pill" style="background:rgba(124,58,237,.15);color:var(--accent3);border:1px solid var(--border)">Antecipada por Peçanha em Miguel e Wilder</span></div>
+      </div>
+    </div>
+    <div class="detail-grid">
+      <div class="detail-section"><div class="ds-title ctx">Contexto</div><p>O closer antecipou essa objeção antes que o prospect perguntasse, dizendo: "Vai eliminar meus colaboradores? Não necessariamente." É uma técnica poderosa — antecipar gera confiança e elimina a resistência antes de ser verbalizada.</p></div>
+      <div class="detail-section"><div class="ds-title psy">Psicologia</div><p>Conflito de identidade: o dono se vê como líder que protege a equipe. A IA representa ameaça a essa identidade. Também há medo prático de resistência interna da equipe à mudança tecnológica.</p></div>
+      <div class="detail-section"><div class="ds-title resp">Como Responder</div><ul><li>Antecipar proativamente — não espere o prospect levantar.</li><li>Reframe: não demite, redistribui. Tarefas repetitivas vão para os agentes; humanos fazem o estratégico.</li><li>Caso real: "O SDR humano passou a cuidar de relacionamento; o agente faz a prospecção fria."</li></ul></div>
+      <div class="detail-section"><div class="ds-title phrase">Frase Modelo</div><div class="quote-d">"Vou tocar num ponto que muitos donos pensam mas não perguntam: 'isso vai substituir minha equipe?' Não vai demitir — vai redistribuir. Os agentes fazem as tarefas de menor valor; seus colaboradores fazem o que exige julgamento humano. Seu time fica mais forte."</div></div>
+    </div>
+    <div class="impact-row"><span class="impact-lbl">Risco de perda</span><div class="impact-track"><div style="width:35%;height:100%;background:linear-gradient(90deg,#10b981,#34d399);border-radius:10px"></div></div><span class="impact-pct" style="color:#34d399">35%</span></div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════
+     TAB 4 — CALLS REAIS
+══════════════════════════════════════════ -->
+<div id="calls" class="panel">
+
+  <div style="margin-bottom:8px">
+    <h2>Objeções das Calls Reais</h2>
+    <p class="lead" style="margin-bottom:8px">Duarte (5 calls VTT) + Peçanha (40 calls gravadas) · Combinado · Fev/2026</p>
+    <p style="font-size:13px;color:var(--muted);background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 16px;margin-bottom:32px">Objeções idênticas foram unificadas. Onde houve repetição, indicamos a quantidade total de ocorrências e um prospect como exemplo representativo.</p>
+  </div>
+
+  <!-- CALL ITEM STYLE -->
+  <style>
+  .call-obj{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:24px 28px;margin-bottom:18px;position:relative;overflow:hidden}
+  .call-obj::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:linear-gradient(180deg,var(--accent),var(--accent2));border-radius:4px 0 0 4px}
+  .call-obj-num{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent3);margin-bottom:6px}
+  .call-obj-title{font-size:18px;font-weight:700;color:var(--text);font-style:italic;margin-bottom:14px;line-height:1.3}
+  .call-who{margin-bottom:12px}
+  .call-who-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--gold);margin-bottom:6px}
+  .call-who-names{font-size:13.5px;color:#cbd5e1;margin-bottom:8px}
+  .call-quote{background:var(--surface2);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;padding:10px 14px;font-size:13px;color:var(--accent3);font-style:italic;line-height:1.55;margin-bottom:6px}
+  .call-context{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:14px}
+  .call-resolved-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--green);margin-bottom:6px}
+  .call-resolved{font-size:13.5px;color:#cbd5e1;line-height:1.65}
+  .call-count{display:inline-flex;align-items:center;gap:6px;background:rgba(124,58,237,.12);border:1px solid var(--border);border-radius:20px;padding:3px 12px;font-size:11px;font-weight:600;color:var(--accent3);margin-left:10px}
+  </style>
+
+  <!-- OBJ 1 -->
+  <div class="call-obj">
+    <div class="call-obj-num">OBJEÇÃO 1</div>
+    <div class="call-obj-title">"Quero ver na prática, não no papel." <span class="call-count">~3–4 calls</span></div>
+    <div class="call-who">
+      <div class="call-who-label">Quem</div>
+      <div class="call-who-names">Karine (SubidoPRO) — calls Duarte · Diogo (apostas esportivas) — call Peçanha</div>
+      <div class="call-quote">"Eu queria ver na prática. Isso aí eu não queria ver no papel." — Karine</div>
+      <p class="call-context">Karine é especialista em IA com certificação pelo Stanford. Ficou convencida pelo conceito mas precisava ver o sistema rodando ao vivo antes de decidir. Diogo fez pedido semelhante antes de confirmar a reunião de follow-up.</p>
+    </div>
+    <div class="call-resolved-label">Como foi resolvido</div>
+    <div class="call-resolved">Duarte escalou para Pedro Valerio, que demonstrou o sistema em tempo real na segunda call — sistema rodando na tela, não slides. No caso de Diogo, Peçanha agendou follow-up com demonstração prática do produto.</div>
+  </div>
+
+  <!-- OBJ 2 -->
+  <div class="call-obj">
+    <div class="call-obj-num">OBJEÇÃO 2</div>
+    <div class="call-obj-title">"Preciso consultar meu sócio / parceiro antes." <span class="call-count">~13–14 calls — a mais frequente</span></div>
+    <div class="call-who">
+      <div class="call-who-label">Quem</div>
+      <div class="call-who-names">Arcson Asunção, Miguel Ribeiro — Duarte · Lions (eventos), Christian (concurso), André (veículos), Marcelo (EUA/filtros) e ~8 outros — Peçanha</div>
+      <div class="call-quote">"Eu vou tentar sensibilizar os outros executivos para ratear o investimento entre operações." — Arcson</div>
+      <div class="call-quote">"Preciso sentar com meu sócio para fazer essa definição." — Miguel</div>
+      <p class="call-context">Decisão multi-stakeholder. Em muitos casos o prospect estava individualmente convicto mas não tinha poder de comprometer R$100k sozinho. Em outros, o sócio era o decisor real e simplesmente não estava na call.</p>
+    </div>
+    <div class="call-resolved-label">Como foi resolvido</div>
+    <div class="call-resolved">Duarte: compartilhou materiais (PDF + link do site) para facilitar aprovação interna. Ofereceu call com Alan/Finch caso os parceiros quisessem ver.<br><br>Peçanha: agendou follow-up direto com o decisor presente, enviou resumo executivo por WhatsApp, e em alguns casos ofereceu call rápida de 15 minutos com sócio + closer juntos.</div>
+  </div>
+
+  <!-- OBJ 3 -->
+  <div class="call-obj">
+    <div class="call-obj-num">OBJEÇÃO 3</div>
+    <div class="call-obj-title">"Tenho medo de não estar preparado / não ter aproveitamento." <span class="call-count">~6–7 calls</span></div>
+    <div class="call-who">
+      <div class="call-who-label">Quem</div>
+      <div class="call-who-names">Wilder Leal (mineração), Miguel Ribeiro (advocacia) — Duarte · Outros em setores tradicionais — Peçanha</div>
+      <div class="call-quote">"Eu não vou ter aproveitamento. As pessoas ali estão em outro nível." — Wilder</div>
+      <div class="call-quote">"Não posso ir cru na imersão. A gente tem que engolir essa papa devagar, senão engasga." — Miguel</div>
+      <p class="call-context">Medo de estar aquém tecnicamente e perder o investimento por não conseguir absorver o conteúdo. Mais frequente em empresários de setores tradicionais (mineração, advocacia, indústria) com baixa familiaridade com IA.</p>
+    </div>
+    <div class="call-resolved-label">Como foi resolvido</div>
+    <div class="call-resolved">Duarte explicou que não precisa saber programar, que o setup técnico é feito antes do evento por um mentor, e que os alunos saem de lá com tudo implementado — não é curso, é mão na massa.<br><br>Peçanha reforçou que o programa foi feito para quem ainda não tem IA implementada, e usou casos de alunos de setores tradicionais que saíram com o sistema funcionando.</div>
+  </div>
+
+  <!-- OBJ 4 -->
+  <div class="call-obj">
+    <div class="call-obj-num">OBJEÇÃO 4</div>
+    <div class="call-obj-title">"Não é o dinheiro, é o timing / maturidade. Próxima turma talvez." <span class="call-count">~3 calls</span></div>
+    <div class="call-who">
+      <div class="call-who-label">Quem</div>
+      <div class="call-who-names">Wilder Leal — Duarte · Robert (RS, provedores + construtora) — Peçanha</div>
+      <div class="call-quote">"A nossa questão não é o dinheiro. É a degustação da informação. A gente precisa amadurecer primeiro." — Wilder</div>
+      <div class="call-quote">"Quero ir na próxima turma quando já tiver consumido o Fundamentals e o Advanced." — Wilder</div>
+      <p class="call-context">Objeção de timing disfarçada de preparação. O prospect está convencido do valor, mas usa "não estou pronto" para adiar a decisão. Robert, que havia acabado de comprar o Cohort Fundamentals, queria "adquirir o feeling" antes de ir para a imersão.</p>
+    </div>
+    <div class="call-resolved-label">Como foi resolvido</div>
+    <div class="call-resolved">Duarte foi direto: "Eu sei que o problema não é dinheiro. Meu receio é vocês se arrependerem daqui seis meses." Não fechou, mas manteve o relacionamento aberto com follow-up agendado.<br><br>Peçanha usou o argumento da escassez de vagas e inverteu o raciocínio: "Exatamente por você estar crescendo agora é o melhor momento — os processos escalam certos ou errados."</div>
+  </div>
+
+  <!-- OBJ 5 -->
+  <div class="call-obj">
+    <div class="call-obj-num">OBJEÇÃO 5</div>
+    <div class="call-obj-title">"E se eu não conseguir usar depois da imersão?" <span class="call-count">Recorrente implícita — ~5+ calls</span></div>
+    <div class="call-who">
+      <div class="call-who-label">Quem</div>
+      <div class="call-who-names">Recorrente em várias calls — antecipada por Duarte antes do prospect perguntar</div>
+      <div class="call-quote">"Se eu não conseguir usar depois…" — variação implícita em múltiplas calls</div>
+      <p class="call-context">Dúvida sobre implementação pós-evento. O prospect tem medo de pagar R$100k, sair da imersão animado e depois não conseguir colocar nada em prática na correria do dia a dia — algo que muitos já viveram com outros cursos e mentorias.</p>
+    </div>
+    <div class="call-resolved-label">Como foi resolvido</div>
+    <div class="call-resolved">Estrutura de suporte clara — 3 meses de mentoria individual + grupo privado. Duarte reforçava que o prospect já SAI da imersão com tudo funcionando — não é teoria, o sistema é construído e entregue nos 2 dias presenciais.</div>
+  </div>
+
+  <!-- OBJ 6 -->
+  <div class="call-obj">
+    <div class="call-obj-num">OBJEÇÃO 6</div>
+    <div class="call-obj-title">"Vai eliminar meus funcionários?" <span class="call-count">~2 calls — antecipada pelo closer</span></div>
+    <div class="call-who">
+      <div class="call-who-label">Quem</div>
+      <div class="call-who-names">Antecipada por Duarte nas calls com Miguel Ribeiro e Wilder Leal · Antecipada por Peçanha em calls similares</div>
+      <div class="call-quote">"Ah, Duarte, isso vai eliminar meus colaboradores? Não necessariamente." — Duarte falando antes do cliente perguntar</div>
+      <p class="call-context">Medo de demissões em massa na própria empresa. O dono se identifica com a equipe e teme ser o "vilão" que implementou IA para cortar pessoas. A objeção foi levantada pelo próprio closer antes que o prospect verbaliza — técnica que gera confiança imediata.</p>
+    </div>
+    <div class="call-resolved-label">Como foi resolvido</div>
+    <div class="call-resolved">Reframe rápido — não substitui, multiplica. Quem antes fazia tarefas operacionais repetitivas passa a fazer coisas mais estratégicas. "O SDR humano cuida de relacionamento; o agente SDR faz a prospecção fria." O time não encolhe — fica mais forte.</div>
+  </div>
+
+  <!-- OBJ 7 -->
+  <div class="call-obj">
+    <div class="call-obj-num">OBJEÇÃO 7</div>
+    <div class="call-obj-title">"O suporte depois é só um grupo de WhatsApp?" <span class="call-count">~1–2 calls</span></div>
+    <div class="call-who">
+      <div class="call-who-label">Quem</div>
+      <div class="call-who-names">Adriano (SubidoPRO) — call de follow-up com Pedro Valerio</div>
+      <div class="call-quote">"Esse suporte vai ser grupo de WhatsApp?" — Adriano</div>
+      <p class="call-context">Dúvida sobre a qualidade real do suporte pós-evento. Adriano perguntou diretamente durante o follow-up — sinal de que a percepção de suporte não havia sido comunicada claramente na primeira call. Quem paga R$100k espera que o suporte seja proporcional ao investimento.</p>
+    </div>
+    <div class="call-resolved-label">Como foi resolvido</div>
+    <div class="call-resolved">Duarte corrigiu na hora: 3 meses de acompanhamento individual com os próprios mentores, não só grupo. O grupo é o canal de comunicação; o suporte real é o acompanhamento mensal direto com Alan, Thiago e Pedro.</div>
+  </div>
+
+  <!-- OBJ 8 -->
+  <div class="call-obj">
+    <div class="call-obj-num">OBJEÇÃO 8</div>
+    <div class="call-obj-title">"Parece bom demais para ser verdade." <span class="call-count">~1–2 calls</span></div>
+    <div class="call-who">
+      <div class="call-who-label">Quem</div>
+      <div class="call-who-names">Arcson Asunção — call Duarte</div>
+      <div class="call-quote">"Quero acreditar que sim. Parece muito bom pra ser verdade." — Arcson</div>
+      <p class="call-context">Ceticismo sobre as promessas. Arcson é serial entrepreneur com múltiplas empresas tech — perfil que já viu muitas promessas não sustentadas. Paradoxalmente, quando esse perfil converte, torna-se um defensor forte do produto.</p>
+    </div>
+    <div class="call-resolved-label">Como foi resolvido</div>
+    <div class="call-resolved">Pedro Valerio fez demonstração ao vivo do sistema real rodando durante a call de follow-up. Para perfil técnico, nada convence mais do que ver funcionando — não slides, não depoimentos, não promessas. Sistema ao vivo, problema real sendo resolvido na tela.</div>
+  </div>
+
+  <!-- OBJ 9 — NOVA PEÇANHA -->
+  <div class="call-obj">
+    <div class="call-obj-num">OBJEÇÃO 9 — Peçanha</div>
+    <div class="call-obj-title">"Não tenho esse dinheiro agora / fluxo de caixa apertado." <span class="call-count">~10 calls</span></div>
+    <div class="call-who">
+      <div class="call-who-label">Quem</div>
+      <div class="call-who-names">André (veículos usados, Curitiba), Thales (revestimentos naturais, BH), Blenner (Capitão FAB, RJ), Guilherme (dropshipping), Lucas (IA clínicas médicas) e outros</div>
+      <div class="call-quote">"Tenho contratos 'open lojas' que comprometem meu caixa agora." — André (veículos)</div>
+      <div class="call-quote">"Tenho um investimento de mudança de loja planejado para abril de uns R$100k." — Thales (revestimentos)</div>
+      <p class="call-context">O caixa está comprometido com outros investimentos paralelos — reforma de loja, expansão física, contratos em andamento. Em ~4 casos o prospect foi redirecionado para o Cohort Advanced (R$24.888) como alternativa mais acessível e adequada para o momento.</p>
+    </div>
+    <div class="call-resolved-label">Como foi resolvido</div>
+    <div class="call-resolved">Peçanha apresentou as opções de parcelamento (PIX 2×55k ou 3×38k, cartão até 12×) antes da objeção aparecer. Calculou o custo mensal de não implementar usando os dados do próprio prospect. Para quem realmente não tinha caixa para a imersão, redirecionou para o Cohort Advanced como porta de entrada.</div>
+  </div>
+
+  <!-- OBJ 10 — NOVA PEÇANHA -->
+  <div class="call-obj">
+    <div class="call-obj-num">OBJEÇÃO 10 — Peçanha</div>
+    <div class="call-obj-title">"O CEO / diretor financeiro não estava na call." <span class="call-count">~6 calls</span></div>
+    <div class="call-who">
+      <div class="call-who-label">Quem</div>
+      <div class="call-who-names">João+Rômulo (HB Company, gaming), Gabriel (Startup Simplifica, CRM), Ed (Contour Magic, R$115M faturamento), Luiz+Bruno (acompanhamento médico, MG)</div>
+      <div class="call-quote">"Preciso passar pelo nosso diretor financeiro — ele não estava aqui hoje." — Ed (Contour Magic)</div>
+      <p class="call-context">Calls chegaram com gestores intermediários ou sócios sem poder de decisão de R$100k. O decisor real estava ciente mas delegou a call para um subordinado — que saiu sem poder fechar. O entusiasmo da pessoa presente esfriou ao tentar "vender internamente" para o chefe.</p>
+    </div>
+    <div class="call-resolved-label">Como foi resolvido</div>
+    <div class="call-resolved">Peçanha agendou follow-up específico com o decisor presente, enviou material resumido por WhatsApp, e em alguns casos enviou o R$5k de confirmação como forma de "reservar a vaga" enquanto o decisor analisava. Ed (Contour Magic) pagou R$5k e ficou aguardando aprovação do financeiro para segunda-feira.</div>
+  </div>
+
+  <!-- OBJ 11 — NOVA PEÇANHA -->
+  <div class="call-obj">
+    <div class="call-obj-num">OBJEÇÃO 11 — Peçanha</div>
+    <div class="call-obj-title">"Não consigo calcular o ROI / retorno não está claro." <span class="call-count">~5 calls</span></div>
+    <div class="call-who">
+      <div class="call-who-label">Quem</div>
+      <div class="call-who-names">Yuri+Victor (Sunni, energia solar, 80 funcionários), Helder+Eduardo (consultores, Londrina), Alexandre (SaaS distribuidoras industriais)</div>
+      <div class="call-quote">"Eu preciso de mais garantias de que isso vai funcionar para o nosso modelo antes de comprometer R$100k." — Yuri (Sunni)</div>
+      <p class="call-context">Prospects analíticos que precisam de um cálculo concreto para justificar o investimento internamente. Quando o ROI não foi apresentado de forma específica para o setor/modelo do prospect, a decisão travou — especialmente em empresas com processo decisório formal.</p>
+    </div>
+    <div class="call-resolved-label">Como foi resolvido</div>
+    <div class="call-resolved">Peçanha tentou calcular o ROI ao vivo usando os números do próprio prospect coletados no diagnóstico. Nos casos onde o ROI era genuinamente incerto para o modelo de negócio, reconheceu a limitação e redirecionou para o Cohort Advanced como alternativa de menor risco. Yuri (energia solar) não fechou mesmo após negociação — ROI real do setor precisaria de case comprovado.</div>
+  </div>
+
+  <!-- OBJ 12 — NOVA PEÇANHA -->
+  <div class="call-obj">
+    <div class="call-obj-num">OBJEÇÃO 12 — Peçanha</div>
+    <div class="call-obj-title">"Preciso da aprovação da minha esposa / família." <span class="call-count">~3 calls</span></div>
+    <div class="call-who">
+      <div class="call-who-label">Quem</div>
+      <div class="call-who-names">Christian (Brasília, preparatório concurso público), Marcelo+Pedro (RS, treinamentos corporativos), André (veículos, Curitiba)</div>
+      <div class="call-quote">"Minha esposa está grávida de gêmeos — preciso que ela aprove antes de comprometer esse valor." — Christian (Brasília)</div>
+      <p class="call-context">Diferente da objeção do sócio (que é geralmente empresarial), essa é uma objeção pessoal e emocional. O prospect não quer tomar uma decisão de R$100k sem alinhamento familiar — especialmente em momentos de vida significativos (gravidez, transição de carreira).</p>
+    </div>
+    <div class="call-resolved-label">Como foi resolvido</div>
+    <div class="call-resolved">Peçanha validou a objeção sem resistência — "faz todo sentido incluir ela nessa decisão." Verificou se a esposa poderia participar de uma call rápida ou receber o material. No caso do Christian, confirmou que a esposa (grávida) poderia acompanhar presencialmente no evento e que haveria acomodação adequada.</div>
+  </div>
+
+  <!-- OBJ 13 — NOVA PEÇANHA -->
+  <div class="call-obj">
+    <div class="call-obj-num">OBJEÇÃO 13 — Peçanha</div>
+    <div class="call-obj-title">"Tive problema técnico para pagar / cartão bloqueou." <span class="call-count">~3 calls</span></div>
+    <div class="call-who">
+      <div class="call-who-label">Quem</div>
+      <div class="call-who-names">Eduardo Collado (Itapema, DR afiliado), Willian Jackson+Felipe (WB Group, Salvador/RJ), Italo (fintech, SC)</div>
+      <div class="call-quote">"O checkout está em polonês — não consigo finalizar o pagamento." — Eduardo Collado</div>
+      <div class="call-quote">"O banco bloqueou meu cartão durante a transação de R$100k — precisou de verificação." — Willian Jackson</div>
+      <p class="call-context">Prospect 100% decidido a fechar, mas impedimentos técnicos na hora do pagamento quase derrubaram a venda. Eduardo: erro no checkout (polonês). Willian: banco americano bloqueou transação alta sem aviso. Italo: pagou R$5k de entrada e ficou aguardando resolver o restante.</p>
+    </div>
+    <div class="call-resolved-label">Como foi resolvido</div>
+    <div class="call-resolved">Peçanha manteve a call ativa enquanto resolvia o problema técnico ao vivo — buscou link alternativo de pagamento, orientou sobre desbloqueio do cartão junto ao banco, e ofereceu PIX parcelado como alternativa imediata. Eduardo fechou após o erro do checkout ser corrigido. Willian pagou R$5k de entrada e ficou aguardando desbloqueio do cartão.</div>
+  </div>
+
+  <!-- OBJ 14 — NOVA PEÇANHA -->
+  <div class="call-obj">
+    <div class="call-obj-num">OBJEÇÃO 14 — Peçanha</div>
+    <div class="call-obj-title">"Não posso comparecer presencialmente — moro fora do Brasil." <span class="call-count">~2 calls</span></div>
+    <div class="call-who">
+      <div class="call-who-label">Quem</div>
+      <div class="call-who-names">Abelardo (Dubai, EAU — iGame apostas esportivas + private equity), Marcelo (Boca Raton, Florida — filtros de água incubado na FAU)</div>
+      <div class="call-quote">"Eu moro em Dubai — vir ao Brasil para dois dias de evento é inviável logisticamente agora." — Abelardo</div>
+      <p class="call-context">Prospects com perfil e caixa adequados para a imersão, mas geograficamente impossibilitados de comparecer presencialmente em Florianópolis nos dias 19 e 20 de março. Abelardo mora nos EAU; Marcelo está incubado em uma universidade na Florida.</p>
+    </div>
+    <div class="call-resolved-label">Como foi resolvido</div>
+    <div class="call-resolved">Peçanha verificou a possibilidade de exceção para participação online para Abelardo — ficou de confirmar com o time antes de fechar. Para Marcelo, o caminho foi verificar se ele conseguia se deslocar ao Brasil na data ou se seria possível incluir na turma seguinte. Ambos ficaram como follow-up pendente aguardando retorno do time sobre flexibilidade de formato.</div>
+  </div>
+
+</div>
+
+<div class="footer">
+  <p>Inteligência de Vendas — Imersão AIOS · 47 gravações analisadas · Closer: Gustavo Peçanha · Fev/2026 · BILHON · Confidencial</p>
+</div>
+
+<script>
+function showTab(id, btn) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+</script>
+</body>
+</html>
